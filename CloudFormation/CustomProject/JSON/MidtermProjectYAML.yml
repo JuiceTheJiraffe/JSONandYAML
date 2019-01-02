@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  This is a template I made based on my midterm project I performed for my Cloud and Data Center Management class in college.
+  This is a template I made based on my midterm project I performed for my Cloud and Data Center Management class in college. Read Description
 Resources:
   ProdVPC:
     Type: 'AWS::EC2::VPC'
