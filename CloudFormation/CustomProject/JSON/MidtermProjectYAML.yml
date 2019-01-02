@@ -1,0 +1,616 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  This is a template I made based on my midterm project I performed for my Cloud and Data Center Management class in college.
+Resources:
+  ProdVPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      CidrBlock: 10.0.0.0/16
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+  VPCGatewayAttachment:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref ProdVPC
+      InternetGatewayId: !Ref InternetGateway
+  PublicSubnet1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref ProdVPC
+      CidrBlock: 10.0.0.0/24
+      AvailabilityZone: us-east-1a
+  PublicSubnet2:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref ProdVPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: us-east-1b
+  WebPrivate1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref ProdVPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: us-east-1a
+  WebPrivate2:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref ProdVPC
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: us-east-1b
+  AppPrivate1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref ProdVPC
+      CidrBlock: 10.0.4.0/24
+      AvailabilityZone: us-east-1a
+  AppPrivate2:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref ProdVPC
+      CidrBlock: 10.0.5.0/24
+      AvailabilityZone: us-east-1b
+  DBPrivate1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref ProdVPC
+      CidrBlock: 10.0.6.0/24
+      AvailabilityZone: us-east-1a
+  DBPrivate2:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref ProdVPC
+      CidrBlock: 10.0.7.0/24
+      AvailabilityZone: us-east-1b
+  EIP:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: !Ref ProdVPC
+    DependsOn: InternetGateway
+  Nat:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt EIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
+  PublicRouteTable1:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref ProdVPC
+  PublicRouteTable2:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref ProdVPC
+  PrivateRouteTable1:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref ProdVPC
+  PrivateRouteTable2:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref ProdVPC
+  PrivateRouteTable3:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref ProdVPC
+  PrivateRouteTable4:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref ProdVPC
+  PrivateRouteTable5:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref ProdVPC
+  PrivateRouteTable6:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref ProdVPC
+  PublicRoute1:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable1
+    DependsOn: InternetGateway
+  RouteTableSubnets1:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref PublicRouteTable1
+      SubnetId: !Ref PublicSubnet1
+  PublicRoute2:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTable2
+    DependsOn: InternetGateway
+  RouteTableSubnets2:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref PublicRouteTable2
+      SubnetId: !Ref PublicSubnet2
+  PrivateRoute1:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref Nat
+      RouteTableId: !Ref PrivateRouteTable1
+    DependsOn: Nat
+  RouteTableSubnets3:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      SubnetId: !Ref WebPrivate1
+  PrivateRoute2:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref Nat
+      RouteTableId: !Ref PrivateRouteTable2
+    DependsOn: Nat
+  RouteTableSubnets4:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: !Ref WebPrivate2
+  PrivateRoute3:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref Nat
+      RouteTableId: !Ref PrivateRouteTable3
+    DependsOn: Nat
+  RouteTableSubnets5:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable3
+      SubnetId: !Ref AppPrivate1
+  PrivateRoute4:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref Nat
+      RouteTableId: !Ref PrivateRouteTable4
+    DependsOn: Nat
+  RouteTableSubnets6:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable4
+      SubnetId: !Ref AppPrivate2
+  PrivateRoute5:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref Nat
+      RouteTableId: !Ref PrivateRouteTable5
+    DependsOn: Nat
+  RouteTableSubnets7:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable5
+      SubnetId: !Ref DBPrivate1
+  PrivateRoute6:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref Nat
+      RouteTableId: !Ref PrivateRouteTable6
+    DependsOn: Nat
+  RouteTableSubnets8:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable6
+      SubnetId: !Ref DBPrivate2
+  EC2toS3Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+  EC2toS3:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: EC2toS3
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action: 
+            - "s3:Get*"
+            - "s3:Put*"
+            - "S3:List*"
+          Resource: "*"
+      Roles:
+      - !Ref EC2toS3Role
+  InstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Roles:
+        - !Ref EC2toS3Role
+  SysAdmin:
+    Type: 'AWS::IAM::Group'
+    Properties:
+      GroupName: SysAdmin
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+  DBAdmin:
+    Type: 'AWS::IAM::Group'
+    Properties:
+      GroupName: DBAdmin
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonRDSFullAccess
+  Monitor:
+    Type: 'AWS::IAM::Group'
+    Properties:
+      GroupName: Monitor
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonRDSReadOnlyAccess
+  sysadmin1:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: sysadmin1
+      Groups: 
+        - SysAdmin
+      LoginProfile:
+        Password: Password1
+        PasswordResetRequired: True
+    DependsOn: SysAdmin
+  sysadmin2:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: sysadmin2
+      Groups: 
+        - SysAdmin
+      LoginProfile:
+        Password: Password1
+        PasswordResetRequired: True
+    DependsOn: SysAdmin
+  dbadmin1:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: dbadmin1
+      Groups: 
+        - DBAdmin
+      LoginProfile:
+        Password: Password1
+        PasswordResetRequired: True
+    DependsOn: DBAdmin
+  dbadmin2:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: dbadmin2
+      Groups: 
+        - DBAdmin
+      LoginProfile:
+        Password: Password1
+        PasswordResetRequired: True
+    DependsOn: DBAdmin
+  monitoruser1:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: monitoruser1
+      Groups: 
+        - Monitor
+      LoginProfile:
+        Password: Password1
+        PasswordResetRequired: True
+    DependsOn: Monitor
+  monitoruser2:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: monitoruser2
+      Groups: 
+        - Monitor
+      LoginProfile:
+        Password: Password1
+        PasswordResetRequired: True
+    DependsOn: Monitor
+  monitoruser3:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: monitoruser3
+      Groups: 
+        - Monitor
+      LoginProfile:
+        Password: Password1
+        PasswordResetRequired: True
+    DependsOn: Monitor
+  monitoruser4:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: monitoruser4
+      Groups: 
+        - Monitor
+      LoginProfile:
+        Password: Password1
+        PasswordResetRequired: True
+    DependsOn: Monitor
+  S3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: thisismycloudtrailbucketb99lol0
+    DependsOn: PrivateRoute2
+  S3BucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: thisismycloudtrailbucketb99lol0
+      PolicyDocument:
+        {
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AWSCloudTrailAclCheck20150319",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "cloudtrail.amazonaws.com"
+            },
+            "Action": "s3:GetBucketAcl",
+            "Resource": "arn:aws:s3:::thisismycloudtrailbucketb99lol0"
+        },
+        {
+            "Sid": "AWSCloudTrailWrite20150319",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "cloudtrail.amazonaws.com"
+            },
+            "Action": "s3:PutObject",
+            "Resource": "arn:aws:s3:::thisismycloudtrailbucketb99lol0/AWSLogs/026805088484/*",
+            "Condition": {
+                "StringEquals": {
+                    "s3:x-amz-acl": "bucket-owner-full-control"
+                }
+            }
+        }
+    ]
+}
+    DependsOn: S3Bucket
+  ProdTrail:
+    Type: 'AWS::CloudTrail::Trail'
+    Properties:
+      IncludeGlobalServiceEvents: True
+      IsLogging: True
+      IsMultiRegionTrail: True
+      TrailName: productiontrail
+      S3BucketName: thisismycloudtrailbucketb99lol0
+    DependsOn: S3BucketPolicy
+  WebLBSG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SG for Web ELB
+      VpcId: !Ref ProdVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+    DependsOn: ProdVPC
+  WebServerSG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SG for Web servers
+      VpcId: !Ref ProdVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        SourceSecurityGroupId: !Ref WebLBSG
+    DependsOn: WebLBSG
+  AppLBSG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SG for app ELB
+      VpcId: !Ref ProdVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        SourceSecurityGroupId: !Ref WebServerSG
+    DependsOn: WebServerSG
+  AppServerSG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SG for app servers
+      VpcId: !Ref ProdVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        SourceSecurityGroupId: !Ref AppLBSG
+    DependsOn: AppLBSG
+  DBServerSG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SG for RDS Instance
+      VpcId: !Ref ProdVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 1433
+        ToPort: 1433
+        SourceSecurityGroupId: !Ref AppServerSG
+    DependsOn: AppServerSG
+  DBSubnetGroup:
+    Type: 'AWS::RDS::DBSubnetGroup'
+    Properties:
+      DBSubnetGroupDescription: This is the subnet group for my db
+      DBSubnetGroupName: DBSubnetGroup
+      SubnetIds: 
+        - !Ref DBPrivate1
+        - !Ref DBPrivate2
+    DependsOn:
+      - DBPrivate1
+      - DBPrivate2
+  MyDBInstance:
+    Type: 'AWS::RDS::DBInstance'
+    Properties:
+      AllocatedStorage: 5000
+      MultiAZ: True
+      DBInstanceClass: db.m4.2xlarge
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      Engine: sqlserver-se
+      Iops: 5000
+      MasterUsername: mydbinstance
+      MasterUserPassword: Password1
+      LicenseModel: license-included
+      VPCSecurityGroups: 
+        - !Ref DBServerSG
+    DependsOn: DBSubnetGroup
+  WebEC21:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      AvailabilityZone: us-east-1a
+      IamInstanceProfile: !Ref InstanceProfile
+      ImageId: ami-041114ddee4a98333
+      SecurityGroupIds: 
+        - !Ref WebServerSG
+      SubnetId: !Ref WebPrivate1
+      Tags:
+      - Key: Name
+        Value: web-tier
+      InstanceType: t2.medium
+    DependsOn: InstanceProfile
+  WebEC22:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      AvailabilityZone: us-east-1b
+      IamInstanceProfile: !Ref InstanceProfile
+      ImageId: ami-041114ddee4a98333
+      SecurityGroupIds: 
+        - !Ref WebServerSG
+      SubnetId: !Ref WebPrivate2
+      Tags:
+      - Key: Name
+        Value: web-tier
+      InstanceType: t2.medium
+    DependsOn: InstanceProfile
+  AppEC21:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      AvailabilityZone: us-east-1a
+      ImageId: ami-041114ddee4a98333
+      SecurityGroupIds: 
+        - !Ref AppServerSG
+      SubnetId: !Ref AppPrivate1
+      Tags:
+      - Key: Name
+        Value: app-tier
+      InstanceType: m4.xlarge
+    DependsOn: AppServerSG
+  AppEC22:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      AvailabilityZone: us-east-1b
+      ImageId: ami-041114ddee4a98333
+      SecurityGroupIds: 
+        - !Ref AppServerSG
+      SubnetId: !Ref AppPrivate2
+      Tags:
+      - Key: Name
+        Value: app-tier
+      InstanceType: m4.xlarge
+    DependsOn: AppServerSG
+  WebELB:
+    Type: 'AWS::ElasticLoadBalancing::LoadBalancer'
+    Properties:
+      Scheme: internet-facing
+      Instances:
+      - !Ref WebEC21
+      - !Ref WebEC22
+      Listeners:
+      - LoadBalancerPort: 80
+        InstancePort: 80
+        Protocol: TCP
+        InstanceProtocol: TCP
+      SecurityGroups:
+        - !Ref WebLBSG
+      Tags:
+      - Key: Name
+        Value: web-elb
+      Subnets:
+        - !Ref WebPrivate1
+        - !Ref WebPrivate2
+      LoadBalancerName: web-elb
+    DependsOn:
+      - WebLBSG
+      - WebPrivate1
+      - WebPrivate2
+  AppELB:
+    Type: 'AWS::ElasticLoadBalancing::LoadBalancer'
+    Properties:
+      Scheme: internal
+      Instances:
+      - !Ref AppEC21
+      - !Ref AppEC22
+      Listeners:
+      - LoadBalancerPort: 80
+        InstancePort: 80
+        Protocol: TCP
+        InstanceProtocol: TCP
+      SecurityGroups:
+        - !Ref AppLBSG
+      Tags:
+      - Key: Name
+        Value: app-elb
+      Subnets:
+        - !Ref AppPrivate1
+        - !Ref AppPrivate2
+      LoadBalancerName: app-elb
+    DependsOn:
+      - AppLBSG
+      - AppPrivate1
+      - AppPrivate2
+ WebTierLC:
+    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Properties:
+      LaunchConfigurationName: WebTier
+      IamInstanceProfile: !Ref InstanceProfile
+      ImageId: ami-041114ddee4a98333
+      InstanceType: t2.medium
+      SecurityGroups: 
+        - !Ref WebServerSG
+    DependsOn: WebELB
+  WebTierASG:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Properties:
+      VPCZoneIdentifier:
+        - !Ref WebPrivate1
+        - !Ref WebPrivate2
+      AutoScalingGroupName: WebTier
+      MinSize: 2
+      MaxSize: 4
+      DesiredCapacity: 2
+      LaunchConfigurationName: !Ref WebTierLC
+      LoadBalancerNames:
+        - !Ref WebELB
+    DependsOn: WebTierLC
+  AppTierLC:
+    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Properties:
+      LaunchConfigurationName: AppTier
+      ImageId: ami-041114ddee4a98333
+      InstanceType: m4.xlarge
+      SecurityGroups: 
+        - !Ref AppServerSG
+    DependsOn: AppELB
+  AppTierASG:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Properties:
+      VPCZoneIdentifier:
+        - !Ref AppPrivate1
+        - !Ref AppPrivate2
+      AutoScalingGroupName: AppTier
+      MinSize: 2
+      MaxSize: 4
+      DesiredCapacity: 2
+      LaunchConfigurationName: !Ref AppTierLC
+      LoadBalancerNames:
+        - !Ref AppELB
+    DependsOn: AppTierLC
